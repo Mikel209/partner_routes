@@ -8,19 +8,32 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position='before'>
                 <page string="Visits">
-                    <field name="visit_ids" mode="kanban" context="{'default_parent_id': active_id}">
+                    <field name="visit_ids" mode="kanban" context="{'default_partner_id': id}">
                         <kanban>
                             <templates>
                                 <t t-name="kanban-box">
-                                    <div class="oe_kanban_details">
-                                        <field name="week_day"/><br/>
-                                        <field name="order"/><br/>
-                                        <field name="period"/><br/>
-                                        <field name="next_visit"/>
+                                    <div t-attf-class="oe_kanban_global_click">
+                                        <div class="oe_kanban_details">
+                                            <field name="week_day"/>
+                                            <br/>
+                                            <div>Order: <field name="order"/></div>
+                                            <br/>
+                                            <div>Period: <field name="period"/></div>
+                                            <br/>
+                                            <field name="next_visit"/>
+                                        </div>
                                     </div>
                                 </t>
                             </templates>
                         </kanban>
+                        <form string="Visit">
+                            <sheet>
+                                <group>
+                                    <field name="partner_id" invisible="1"/>
+                                    <field name="week_day" string="Day of the week" required="1"/>
+                                </group>
+                            </sheet>
+                        </form>
                     </field>
                 </page>
             </xpath>

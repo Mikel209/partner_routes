@@ -14,7 +14,6 @@
     ],
     'data': [
         'views/view.xml',
-        'wizards/wizards_open_partner_routes.xml',
     ],
     'installable': True,
     'auto_install': False,
