@@ -34,7 +34,7 @@
                                     <field name="week_day" string="Day of the week" required="1"/>
                                     <field name="order" string="Order number" required="1"/>
                                     <field name="period" string="Period" required="1"/>
-                                    <field name="next_visit" string="Next day of visit" required="1"/>
+                                    <field name="next_visit" string="Next day of visit" readonly="1" required="1"/>
                                 </group>
                             </sheet>
                         </form>
