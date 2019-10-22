@@ -33,13 +33,32 @@ class PartnerVisit(models.Model):
     # @api.onchange('week_day', 'period')
     # def on_change_week_day(self):
     #
-    #     dif = int(self.week_day) - int(datetime.now().strftime('%w'))
-    #     if dif > 0:
-    #         self.next_visit = date.today() + timedelta(days=dif - 7 + self.days_to_add())
-    #     if dif < 0:
-    #         self.next_visit = date.today() + timedelta(days=dif + self.days_to_add())
+    #     mesess = date.today() + timedelta(days=self.days_to_add())
     #
-    #     self.next_visit = date.today() + timedelta(days=self.days_to_add())
+    #     logging.info("Meses")
+    #     logging.info(mesess)
+    #
+    #     dif = int(self.week_day) - int(mesess.strftime('%w'))
+    #
+    #     logging.info("Diferencia")
+    #     logging.info(dif)
+    #     logging.info("wee_day")
+    #     logging.info(self.week_day)
+    #
+    #     if dif > 0:
+    #         logging.info("NextVisit>")
+    #         logging.info(self.next_visit)
+    #         self.next_visit = mesess + timedelta(days=dif)
+    #
+    #     if dif < 0:
+    #         logging.info("NextVisit<")
+    #         logging.info(self.next_visit)
+    #         self.next_visit = mesess + timedelta(days=dif + 7)
+    #
+    #     if dif == 0:
+    #         logging.info("NextVisit")
+    #         logging.info(self.next_visioooooot)
+    #         self.next_visit = mesess + timedelta(days=7)
     #
     # def days_to_add(self):
     #     if self.period == "week":
@@ -49,22 +68,40 @@ class PartnerVisit(models.Model):
     #     if self.period == "month":
     #         return calendar.monthrange(int(datetime.now().strftime('%Y')), int(datetime.now().strftime('%m')))[1]
 
-    @api.onchange('week_day', 'period')
+    @api.onchange('week_day')
     def on_change_week_day(self):
 
-        mesess = date.today() + timedelta(days=self.days_to_add())
-        dif = int(self.week_day) - int(mesess.strftime('%w'))
+
+        dif = int(self.week_day) - int(date.today().strftime('%w'))
+
         if dif > 0:
-            self.next_visit = mesess + timedelta(days=dif)
+            self.next_visit = date.today() + timedelta(days=dif)
+
         if dif < 0:
-            self.next_visit = mesess + timedelta(days=dif + self.days_to_add())
+            self.next_visit = date.today() + timedelta(days=dif + 7)
 
-        self.next_visit = mesess + timedelta(days=self.days_to_add())
+        if dif == 0:
+            self.next_visit = date.today() + timedelta(days=7)
 
-    def days_to_add(self):
-        if self.period == "week":
-            return 7
-        if self.period == "fortnight":
-            return 14
-        if self.period == "month":
-            return calendar.monthrange(int(datetime.now().strftime('%Y')), int(datetime.now().strftime('%m')))[1]
+
+    @api.multi
+    def action_open_visits_routes(self):
+        self.ensure_one()
+        if self.state != 'done':
+            raise UserError(
+                _('The selected picking does not have validated yet. Please validate the picking and retry '))
+            return
+
+        view = self.env.ref('partner_routes.select_visits_routes_form')
+
+        action = {'name': _('Visits Routes'),
+                  'view_type': 'form',
+                  'view_mode': 'form',
+                  'target': 'new',
+                  'res_model': 'select.visits.routes',
+                  'view_id': view.id,
+                  'views': [(view.id, 'form')],
+                  'type': 'ir.actions.act_window',
+                  'context': {'default_visits_id': self.id}}
+
+        return action
