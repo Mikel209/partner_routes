@@ -3,7 +3,7 @@
 
     <record id="view_partner_form_inherit" model="ir.ui.view">
         <field name="name">res.partner.form.inherit</field>
-        <field name="model">res.partner</field>
+        <field name="model">partner.visit</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position='before'>
@@ -15,13 +15,9 @@
                                     <div t-attf-class="oe_kanban_global_click">
                                         <div class="oe_kanban_details">
                                             <field name="week_day"/>
-
                                             <div>Order: <field name="order"/></div>
-
                                             <div>Period: <field name="period"/></div>
-
                                             <div>Next visit day: <field name="next_visit"/></div>
-
                                         </div>
                                     </div>
                                 </t>

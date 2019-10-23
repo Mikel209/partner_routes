@@ -1,7 +1,16 @@
 from odoo import models, fields, api, _
 from datetime import date, datetime, time, timedelta
-import calendar
 import logging
+
+
+class Users(models.Model):
+    _inherit = "res.users"
+
+    partner_ids = fields.One2many('res.partner', 'partner_id')
+
+    @api.multi
+    def action_open_visits_routes(self):
+        logging.info(self.partner_ids)
 
 
 class ResPartner(models.Model):
@@ -9,9 +18,12 @@ class ResPartner(models.Model):
 
     visit_ids = fields.One2many('partner_visit', 'partner_id')
 
+    partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', auto_join=True,
+                                 string='Related Partner', help='Partner-related data of the user')
+
 
 class PartnerVisit(models.Model):
-    _name = "partner_visit"
+    _name = "partner.visit"
     _description = "Partner Visit"
 
     partner_id = fields.Many2one('res.partner', string="Partner")
@@ -28,7 +40,6 @@ class PartnerVisit(models.Model):
         if self.order > 0:
             return {}
         return {'warning': {'title': _('Error!'), 'message': _('The order number must be greater than 0.')}}
-
 
     # @api.onchange('week_day', 'period')
     # def on_change_week_day(self):
@@ -70,8 +81,6 @@ class PartnerVisit(models.Model):
 
     @api.onchange('week_day')
     def on_change_week_day(self):
-
-
         dif = int(self.week_day) - int(date.today().strftime('%w'))
 
         if dif > 0:
@@ -82,26 +91,3 @@ class PartnerVisit(models.Model):
 
         if dif == 0:
             self.next_visit = date.today() + timedelta(days=7)
-
-
-    @api.multi
-    def action_open_visits_routes(self):
-        self.ensure_one()
-        if self.state != 'done':
-            raise UserError(
-                _('The selected picking does not have validated yet. Please validate the picking and retry '))
-            return
-
-        view = self.env.ref('partner_routes.select_visits_routes_form')
-
-        action = {'name': _('Visits Routes'),
-                  'view_type': 'form',
-                  'view_mode': 'form',
-                  'target': 'new',
-                  'res_model': 'select.visits.routes',
-                  'view_id': view.id,
-                  'views': [(view.id, 'form')],
-                  'type': 'ir.actions.act_window',
-                  'context': {'default_visits_id': self.id}}
-
-        return action

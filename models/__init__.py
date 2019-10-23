@@ -1,1 +1,1 @@
-from . import partnervisit
+from . import partner_visit
