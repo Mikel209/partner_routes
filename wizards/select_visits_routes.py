@@ -7,25 +7,26 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class SelectVisitsRoutes(models.TransientModel):
-    _name = 'select.visits.routes'
-    _description = 'Select Visits Routes Wizard'
+class PartnerVisitDay(models.TransientModel):
+    _name = 'partner.visit.day'
+    _description = 'Partner Visit Day'
 
-    user_ids = fields.One2many('res.users', 'partner_visit')
-    visits_routes_ids = fields.Many2many('select.visits.routes.line')
+    partner_id = fields.Many2one('res.partner')
+
+    @api.onchange('user_id')
+    def _onchange_user_id(self):
+        data = []
+        self.partner_id = [(6, 0, [])]
+        for line in self.user_id.move_line_ids:
+            data.append((0, False, self.get_dict_line(line)))
+        self.partner_id = data
+
+    def get_dict_line(self, line):
+        partner_visit_day = {'partner_id': line.product_id,
+                           'week_day': line.move_id.week_day,
+                           'order': line.move_id.order,
+                           'period': line.move_id.period,
+                           'next_visit': line.next_visit}
 
 
-class SelectVisitsRoutesLine(models.TransientModel):
-    _name = 'select.visits.routes.line'
-    _description = 'Select Visits Routes Line Wizard'
-
-    # selected = fields.Boolean(string='Selected', default=True, help='Indicate this line is coming to change')
-    # product_id = fields.Many2one('product.product', string='Product')
-    # previous_purchase_date = fields.Datetime('Previous Purchase Date', required=False)
-    # previous_purchase_price = fields.Float('Previous Purchase Price', digits=dp.get_precision('Product Price'))
-    # previous_cost_price = fields.Float('Previous Cost', digits=dp.get_precision('Product Price'))
-    # current_cost_price = fields.Float('Current Cost', digits=dp.get_precision('Product Price'))
-    # purchase_price = fields.Float('Purchase Price', digits=dp.get_precision('Product Price'))
-    # cost_price = fields.Float('Cost Price', digits=dp.get_precision('Product Price'))
-    # standard_price = fields.Float('Standard Price', digits=dp.get_precision('Product Price'))
-
+        return partner_visit_day

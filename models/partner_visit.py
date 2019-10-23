@@ -10,12 +10,28 @@ class Users(models.Model):
 
     @api.multi
     def action_open_visits_routes(self):
-        logging.info("@"*80)
-        logging.info(self.partner_ids)
-        for partner in self.partner_ids:
-            logging.info(partner.name)
-            for visit in partner.visit_ids:
-                logging.info(visit.week_day)
+        # logging.info("@"*80)
+        # for visit in self.partner_ids.visit_ids:
+        #     logging.info(visit.next_visit)
+
+        # logging.info(self.partner_ids)
+        # for partner in self.partner_ids:
+        #     logging.info(partner.name)
+        #     for visit in partner.visit_ids:
+        #         logging.info(visit.next_visit)
+
+        self.ensure_one()
+        view = self.env.ref('partner_routes.partner_visit_day')
+
+        return {'name': _('Visit'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'target': 'new',
+                'res_model': 'partner.visit.day',
+                'view_id': view.id,
+                'views': [(view.id, 'form')],
+                'type': 'ir.actions.act_window',
+                'context': {'default_user_id': self.id}}
 
 
 class ResPartner(models.Model):

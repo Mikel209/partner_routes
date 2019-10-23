@@ -1,26 +1,20 @@
 <?xml version="1.0"?>
 <odoo>
 
-<!--    <record id="select_visits_routes_form" model="ir.ui.view">-->
-<!--        <field name="name">select.visits.routes.wizard</field>-->
-<!--        <field name="model">select.visits.routes</field>-->
-<!--        <field name="arch" type="xml">-->
-<!--            <form string="Select Visits Routes">-->
-<!--                <group>-->
-<!--                    <field name="res_users" readonly="1" options="{'no_open': True}"/>-->
-<!--                </group>-->
-<!--                <field name="visits_routes_ids">-->
-<!--                    <tree string="Visits Routes Lines" create="0" delete="0" editable="bottom" >-->
-<!--                        <field name="week_day" readonly="1"/>-->
-<!--                    </tree>-->
-<!--                </field>-->
-<!--                <footer>-->
-<!--                    <button string="Cancel" class="btn-secondary" special="cancel"/>-->
-<!--                </footer>-->
-<!--            </form>-->
-<!--        </field>-->
-<!--    </record>-->
-
+    <record id="partner_visit_day" model="ir.ui.view">
+        <field name="name">partner.visit.day.wizard</field>
+        <field name="model">partner.visit.day</field>
+        <field name="arch" type="xml">
+            <form string="Visit">
+                <group>
+                    <field name="partner_id" readonly="1" options="{'no_open': True}"/>
+                </group>
+                <footer>
+                    <button string="Ok" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
 
     <record id="view_res_users_form_inherit" model="ir.ui.view">
         <field name="name">res.users.form.inherit</field>

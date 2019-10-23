@@ -14,8 +14,8 @@
         'base',
     ],
     'data': [
-        'views/view.xml',
         'wizards/wizards_select_visits_routes.xml',
+        'views/view.xml',
     ],
     'installable': True,
     'auto_install': False,
