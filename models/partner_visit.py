@@ -6,20 +6,25 @@ import logging
 class Users(models.Model):
     _inherit = "res.users"
 
-    partner_ids = fields.One2many('res.partner', 'partner_id')
+    partner_ids = fields.One2many('res.partner', 'user_id')
 
     @api.multi
     def action_open_visits_routes(self):
+        logging.info("@"*80)
         logging.info(self.partner_ids)
+        for partner in self.partner_ids:
+            logging.info(partner.name)
+            for visit in partner.visit_ids:
+                logging.info(visit.week_day)
 
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    visit_ids = fields.One2many('partner_visit', 'partner_id')
+    visit_ids = fields.One2many('partner.visit', 'partner_id')
 
-    partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', auto_join=True,
-                                 string='Related Partner', help='Partner-related data of the user')
+    # partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', auto_join=True,
+    #                              string='Related Partner', help='Partner-related data of the user')
 
 
 class PartnerVisit(models.Model):

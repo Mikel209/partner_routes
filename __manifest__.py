@@ -1,6 +1,7 @@
 # Copyright 2018 QubiQ (http://www.qubiq.es)
 # Copyright 2017 Tecnativa - David Vidal
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+
 {
     'name': 'Partner Routes',
     'version': '1.0',
@@ -13,8 +14,8 @@
         'base',
     ],
     'data': [
-        'wizards/wizards_select_visits_routes.xml',
         'views/view.xml',
+        'wizards/wizards_select_visits_routes.xml',
     ],
     'installable': True,
     'auto_install': False,
