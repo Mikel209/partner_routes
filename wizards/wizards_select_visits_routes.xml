@@ -7,7 +7,9 @@
         <field name="arch" type="xml">
             <form string="Visit">
                 <group>
-                    <field name="partner_id" readonly="1" options="{'no_open': True}"/>
+                    <field name="user_id" readonly="1"/>
+                    <field name="partner_id" readonly="1"/>
+                    <field name="visit_id" readonly="1"/>
                 </group>
                 <footer>
                     <button string="Ok" class="btn-secondary" special="cancel"/>
