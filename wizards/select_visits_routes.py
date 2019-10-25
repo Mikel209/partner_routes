@@ -12,20 +12,22 @@ class PartnerVisitDay(models.TransientModel):
     _description = 'Partner Visit Day'
 
     user_id = fields.Many2one('res.users')
-    partner_id = fields.Many2one('res.partner')
-    visit_id = fields.Many2one('partner.visit')
+    partner_name = fields.Char(string='Partner Name')
+    visit_next_day = fields.Date(string='Next Visit')
 
     @api.onchange('user_id')
     def _onchange_user_id(self):
-        # logging.info("----------------------------------")
-        # logging.info(self.user_id.partner_ids.id)
+        logging.info("----------------------------------")
+        logging.info(self.user_id)
         for partner in self.user_id.partner_ids:
             # logging.info(partner.name)
             for visit in partner.visit_ids:
-                self.create({'user_id': self.user_id, 'partner_id': partner.id, 'visit_id': visit.id})
+                logging.info("----------------------------------")
+                logging.info(partner.name)
+                self.create({'user_id': self.user_id.id, 'partner_name': partner.name, 'visit_next_day': visit.next_visit})
+
         #         logging.info("--------")
         #         logging.info(visit.week_day)
         #         logging.info(visit.order)
         #         logging.info(visit.period)
         #         logging.info(visit.next_visit)
-        # logging.info("----------------------------------")
