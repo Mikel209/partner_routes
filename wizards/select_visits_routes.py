@@ -1,5 +1,5 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from odoo.addons import decimal_precision as dp
 
 import logging
@@ -46,6 +46,6 @@ class PartnerVisitDay(models.TransientModel):
             'views': [(tree_view_id, 'tree')],
             'view_mode': 'tree',
             'name': _('Partner Visit Day'),
-            'res_model': 'res.partner',
-            'domain': self._get_domain(),
+            'res_model': 'partner.visit',
+            'domain': self._get_domain()
         }

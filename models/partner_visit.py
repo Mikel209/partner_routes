@@ -10,16 +10,6 @@ class Users(models.Model):
 
     @api.multi
     def action_open_visits_routes(self):
-        # logging.info("@"*80)
-        # for visit in self.partner_ids.visit_ids:
-        #     logging.info(visit.next_visit)
-
-        # logging.info(self.partner_ids)
-        # for partner in self.partner_ids:
-        #     logging.info(partner.name)
-        #     for visit in partner.visit_ids:
-        #         logging.info(visit.next_visit)
-
         self.ensure_one()
         view = self.env.ref('partner_routes.partner_visit_day')
 
@@ -56,49 +46,17 @@ class PartnerVisit(models.Model):
                               default="week")
     next_visit = fields.Date(string='Next Visit')
 
+    user_id = fields.Integer(compute='_compute_user_id', string='User', store=True)
+
+    @api.one
+    def _compute_user_id(self):
+        self.user_id = self.partner_id.user_id
+
     @api.onchange('order')
     def on_change_order(self):
         if self.order > 0:
             return {}
         return {'warning': {'title': _('Error!'), 'message': _('The order number must be greater than 0.')}}
-
-    # @api.onchange('week_day', 'period')
-    # def on_change_week_day(self):
-    #
-    #     mesess = date.today() + timedelta(days=self.days_to_add())
-    #
-    #     logging.info("Meses")
-    #     logging.info(mesess)
-    #
-    #     dif = int(self.week_day) - int(mesess.strftime('%w'))
-    #
-    #     logging.info("Diferencia")
-    #     logging.info(dif)
-    #     logging.info("wee_day")
-    #     logging.info(self.week_day)
-    #
-    #     if dif > 0:
-    #         logging.info("NextVisit>")
-    #         logging.info(self.next_visit)
-    #         self.next_visit = mesess + timedelta(days=dif)
-    #
-    #     if dif < 0:
-    #         logging.info("NextVisit<")
-    #         logging.info(self.next_visit)
-    #         self.next_visit = mesess + timedelta(days=dif + 7)
-    #
-    #     if dif == 0:
-    #         logging.info("NextVisit")
-    #         logging.info(self.next_visioooooot)
-    #         self.next_visit = mesess + timedelta(days=7)
-    #
-    # def days_to_add(self):
-    #     if self.period == "week":
-    #         return 7
-    #     if self.period == "fortnight":
-    #         return 14
-    #     if self.period == "month":
-    #         return calendar.monthrange(int(datetime.now().strftime('%Y')), int(datetime.now().strftime('%m')))[1]
 
     @api.onchange('week_day')
     def on_change_week_day(self):
