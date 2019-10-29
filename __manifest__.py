@@ -15,6 +15,7 @@
     ],
     'data': [
         'wizards/wizards_select_visits_routes.xml',
+        'wizards/wizards_reports_visits_routes.xml',
         'views/view.xml',
     ],
     'installable': True,

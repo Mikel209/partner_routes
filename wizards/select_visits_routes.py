@@ -31,3 +31,21 @@ class PartnerVisitDay(models.TransientModel):
     #              logging.info(visit.order)
     #              logging.info(visit.period)
     #              logging.info(visit.next_visit)
+
+    def _get_domain(self):
+        domain = []
+        if self.user_id.id:
+            domain.append(('user_id', '=', self.user_id.id))
+        return domain
+
+    def run_wizard(self):
+        self.ensure_one()
+        tree_view_id = self.env.ref('partner_routes.view_partner_visit_tree').id
+        return {
+            'type': 'ir.actions.act_window',
+            'views': [(tree_view_id, 'tree')],
+            'view_mode': 'tree',
+            'name': _('Partner Visit Day'),
+            'res_model': 'res.partner',
+            'domain': self._get_domain(),
+        }
