@@ -17,7 +17,7 @@
                                             <field name="week_day"/>
                                             <div>Order: <field name="order"/></div>
                                             <div>Period: <field name="period"/></div>
-                                            <div>Next visit day: <field name="next_visit"/></div>
+                                            <div>Next visit day: <field name="next_date"/></div>
                                         </div>
                                     </div>
                                 </t>
@@ -30,7 +30,7 @@
                                     <field name="week_day" string="Day of the week" required="1"/>
                                     <field name="order" string="Order number" required="1"/>
                                     <field name="period" string="Period" required="1"/>
-                                    <field name="next_visit" string="Next day of visit" required="1"/>
+                                    <field name="next_date" string="Next day of visit" required="1"/>
                                 </group>
                             </sheet>
                         </form>

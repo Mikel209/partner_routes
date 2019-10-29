@@ -44,9 +44,21 @@ class PartnerVisit(models.Model):
     order = fields.Integer(string="Order", default="1")
     period = fields.Selection([('week', 'week'), ('fortnight', 'fortnight'), ('month', 'month')], string='Period',
                               default="week")
-    next_visit = fields.Date(string='Next Visit')
+    next_date = fields.Date(string='Next Visit')
 
     user_id = fields.Integer(compute='_compute_user_id', string='User', store=True)
+
+    # number_phone = fields.Integer(compute='_compute_number_phone', string='Number')
+    #
+    # email = fields.Integer(compute='_compute_email', string='Email')
+    #
+    # @api.one
+    # def _compute_email(self):
+    #     self.email = self.partner_id.email
+    #
+    # @api.one
+    # def _compute_number_phone(self):
+    #     self.number_phone = self.partner_id.phone
 
     @api.one
     def _compute_user_id(self):
@@ -63,10 +75,10 @@ class PartnerVisit(models.Model):
         dif = int(self.week_day) - int(date.today().strftime('%w'))
 
         if dif > 0:
-            self.next_visit = date.today() + timedelta(days=dif)
+            self.next_date = date.today() + timedelta(days=dif)
 
         if dif < 0:
-            self.next_visit = date.today() + timedelta(days=dif + 7)
+            self.next_date = date.today() + timedelta(days=dif + 7)
 
         if dif == 0:
-            self.next_visit = date.today() + timedelta(days=7)
+            self.next_date = date.today() + timedelta(days=7)
