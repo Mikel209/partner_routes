@@ -8,6 +8,13 @@ class Users(models.Model):
 
     partner_ids = fields.One2many('res.partner', 'user_id')
 
+    partner_name = fields.Char(compute="_compute_partner")
+
+    @api.multi
+    def _compute_partner(self):
+        for partner in self.partner_ids:
+            self.partner_name = partner.name
+
     @api.multi
     def action_open_visits_routes(self):
         self.ensure_one()
@@ -42,27 +49,6 @@ class PartnerVisit(models.Model):
     period = fields.Selection([('week', 'week'), ('fortnight', 'fortnight'), ('month', 'month')], string='Period',
                               default="week")
     next_date = fields.Date(string='Next Visit')
-
-    user_id = fields.Integer(compute='_compute_user_id', string='User', store=True)
-
-
-    # number_phone = fields.Integer(compute='_compute_number_phone', string='Number')
-    #
-    # email = fields.Integer(compute='_compute_email', string='Email')
-    #
-    # @api.one
-    # def _compute_email(self):
-    #     self.email = self.partner_id.email
-    #
-    # @api.one
-    # def _compute_number_phone(self):
-    #     self.number_phone = self.partner_id.phone
-
-    @api.one
-    def _compute_user_id(self):
-        self.user_id = self.partner_id.user_id
-        logging.info("-"*80)
-        logging.info(self.user_id)
 
     phone = fields.Char(compute='_compute_partner_data', string='Number')
     email = fields.Char(compute='_compute_partner_data', string='Email')

@@ -40,4 +40,26 @@
         </field>
     </record>
 
+    <record id="view_res_users_form" model="ir.ui.view">
+        <field name="name">res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='access_rights']" position='after'>
+	    	    <page string="Visits">
+                    <field name="partner_ids">
+                        <tree string="Visit Days" create="0">
+                            <field name="partner_ids"/>
+                        </tree>
+                    </field>
+                </page>
+	        </xpath>
+        </field>
+    </record>
+
+
+
+
+<!--            <xpath expr="//page[@string='Preferences']/group/group[@name='preferences']" position='before'>-->
+<!--    choose_delivery_package_view_form-->
 </odoo>
