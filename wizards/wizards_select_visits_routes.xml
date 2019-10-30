@@ -8,7 +8,7 @@
             <form>
                 <group>
                     <field name="user_id" options="{'no_create': True, 'no_open': True}" required="1"/>
-                    <field name="next_date" required="0"/>
+                    <field name="next_date"/>
                 </group>
                 <footer>
                     <button string="Generate Report" name="run_wizard" type="object" default_focus="1"
@@ -34,12 +34,12 @@
         <field name="name">res.partner.visit.tree</field>
         <field name="model">partner.visit</field>
         <field name="arch" type="xml">
-            <tree string="Visit Days" create="0">
+            <tree string="Visit Days"> <!--  create="0" -->
 <!--                <field name="selected" invisible="1"/>-->
-                <field name="order"/>
-                <field name="partner_id"/>
+<!--                <field name="order"/>-->
+<!--                <field name="partner_id"/>-->
                 <field name="user_id"/>
-                <field name="week_day"/>
+<!--                <field name="week_day"/>-->
 <!--                <field name="email"/>-->
 <!--                <field name="number_phone"/>-->
             </tree>

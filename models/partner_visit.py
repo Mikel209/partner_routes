@@ -48,6 +48,7 @@ class PartnerVisit(models.Model):
 
     user_id = fields.Integer(compute='_compute_user_id', string='User', store=True)
 
+
     # number_phone = fields.Integer(compute='_compute_number_phone', string='Number')
     #
     # email = fields.Integer(compute='_compute_email', string='Email')
@@ -63,6 +64,8 @@ class PartnerVisit(models.Model):
     @api.one
     def _compute_user_id(self):
         self.user_id = self.partner_id.user_id
+        logging.info("-"*80)
+        logging.info(self.user_id)
 
     @api.onchange('order')
     def on_change_order(self):
