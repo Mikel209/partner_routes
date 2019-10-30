@@ -18,13 +18,9 @@ class PartnerVisitDay(models.TransientModel):
     def _get_domain(self):
         domain = []
         if self.user_id.id:
-            domain.append(('user_id', '=', self.user_id.id))
-        # if self.next_date:
-        #     format = "%d/%m/%y"
-        #     next_date = self.next_date.strftime(format)
-        #     domain.append(('next_date', '=', next_date))
-            logging.info("*"*80)
-            logging.info(domain)
+            domain.append(('partner_id.user_id', '=', self.user_id.id))
+        if self.next_date:
+            domain.append(('next_date', '=', self.next_date))
         return domain
 
     def run_wizard(self):

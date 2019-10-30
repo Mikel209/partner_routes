@@ -29,9 +29,6 @@ class ResPartner(models.Model):
 
     visit_ids = fields.One2many('partner.visit', 'partner_id')
 
-    # partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', auto_join=True,
-    #                              string='Related Partner', help='Partner-related data of the user')
-
 
 class PartnerVisit(models.Model):
     _name = "partner.visit"
@@ -46,23 +43,13 @@ class PartnerVisit(models.Model):
                               default="week")
     next_date = fields.Date(string='Next Visit')
 
-    user_id = fields.Integer(compute='_compute_user_id', string='User', store=True)
-
-    # number_phone = fields.Integer(compute='_compute_number_phone', string='Number')
-    #
-    # email = fields.Integer(compute='_compute_email', string='Email')
-    #
-    # @api.one
-    # def _compute_email(self):
-    #     self.email = self.partner_id.email
-    #
-    # @api.one
-    # def _compute_number_phone(self):
-    #     self.number_phone = self.partner_id.phone
+    phone = fields.Char(compute='_compute_partner_data', string='Number')
+    email = fields.Char(compute='_compute_partner_data', string='Email')
 
     @api.one
-    def _compute_user_id(self):
-        self.user_id = self.partner_id.user_id
+    def _compute_partner_data(self):
+        self.phone = self.partner_id.phone
+        self.email = self.partner_id.email
 
     @api.onchange('order')
     def on_change_order(self):
