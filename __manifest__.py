@@ -11,10 +11,11 @@
     'license': 'AGPL-3',
     'summary': 'Partner Routes',
     'depends': [
-        'base',
+        'base', 'sale',
     ],
     'data': [
         'wizards/wizards_select_visits_routes.xml',
+        # 'views/view_routes_sell.xml',
         'views/view.xml',
     ],
     'installable': True,

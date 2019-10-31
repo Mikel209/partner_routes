@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!--   <record id="action_routes_sell" model="ir.actions.act_window">-->
+<!--        <field name="name">Visits of the Day</field>-->
+<!--&lt;!&ndash;        <field name="res_model">partner.visit.day</field>&ndash;&gt;-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">form</field>-->
+<!--        <field name="target">new</field>-->
+<!--    </record>-->
+
+    <menuitem id="menu_action_routes_sell_wizard"
+            name="Routes"
+            parent="sale.view_quotation_tree_with_onboarding"
+            sequence="40"
+            action="action_routes_sell"/>
+
+</odoo>

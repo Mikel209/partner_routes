@@ -8,13 +8,6 @@ class Users(models.Model):
 
     partner_ids = fields.One2many('res.partner', 'user_id')
 
-    partner_name = fields.Char(compute="_compute_partner")
-
-    @api.multi
-    def _compute_partner(self):
-        for partner in self.partner_ids:
-            self.partner_name = partner.name
-
     @api.multi
     def action_open_visits_routes(self):
         self.ensure_one()
