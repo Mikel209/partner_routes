@@ -48,9 +48,11 @@
             <xpath expr="//page[@name='access_rights']" position='after'>
 	    	    <page string="Visits">
                     <field name="partner_ids">
-                        <tree string="Visit Days" create="0">
-                            <field name="partner_ids"/>
-                        </tree>
+<!--                        <field name="visit_ids">-->
+                            <tree string="Visit Days" create="0">
+                                <field name="name"/>
+                            </tree>
+<!--                        </field>-->
                     </field>
                 </page>
 	        </xpath>
