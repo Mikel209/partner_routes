@@ -48,6 +48,9 @@
             <xpath expr="//page[2]" position="after">
 	    	    <page string="Customer">
                     <field name="partner_ids">
+                            <tree string="Visit Days" create="0">
+                                <field name="name"/>
+                            </tree>
                     </field>
                 </page>
 	        </xpath>
