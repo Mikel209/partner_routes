@@ -32,5 +32,5 @@ class PartnerVisitDay(models.TransientModel):
             'view_mode': 'tree',
             'name': _('Partner Visit Day'),
             'res_model': 'partner.visit',
-                'domain': self._get_domain()
+            'domain': self._get_domain()
         }

@@ -69,3 +69,4 @@ class PartnerVisit(models.Model):
 
         if dif == 0:
             self.next_date = date.today() + timedelta(days=7)
+
