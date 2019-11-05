@@ -16,6 +16,7 @@
     'data': [
         'wizards/wizards_select_visits_routes.xml',
         # 'views/view_routes_sell.xml',
+        'security/ir.model.access.csv',
         'views/view.xml',
     ],
     'installable': True,

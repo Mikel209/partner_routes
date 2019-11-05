@@ -21,12 +21,18 @@ class RouteSell(models.Model):
 
     def run_button(self):
         info = self.env["partner.visit"].search(
-            [('next_date', '=', date.today()), ('user_id', '=', self.env.user.id)], order='order', limit=1)
-
-        for r in info:
-            logging.info(r)
-
-        logging.info(info.partner_id)
+            [('next_date', '=', date.today())], order='order', limit=1)
+        info2 = self.env["res.users"].browse(self.env.user.id)
+        # , ('user_id', '=', self.env.user.id)
+        # for r in info:
+        #     logging.info(r)
+        logging.info("**********************")
+        logging.info(info)
+        logging.info(info.partner_id.id)
+        logging.info("*"*8)
+        logging.info(info2)
+        logging.info(self.env.user.id)
+        logging.info(info2.id)
 
         self.partner_id = info.partner_id
 
