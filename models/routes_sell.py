@@ -1,27 +1,31 @@
-from odoo import models, fields, api, _
-from datetime import date, datetime, time, timedelta
+from odoo import models, fields, _
+from datetime import date
 import logging
+
 
 class RouteSell(models.Model):
     _inherit = "sale.order"
 
     def run_button(self):
-        info = self.env["partner.visit"].search(
-            [('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id)], order='order',
-            limit=1)
+        next_partner_to_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
 
-        # self.partner_id = info.partner_id
+        self.partner_id = next_partner_to_visit.partner_id
 
         self.env["route.visited"].create({
             'user_id': self.env.user.id,
-            'partner_id': info.partner_id,
+            'partner_id': next_partner_to_visit.partner_id.id,
             'date': date.today(),
         })
+
 
 class RouteVisited(models.Model):
     _name = "route.visited"
     _description = "The Route Visited"
 
-    user_id = fields.Many2one('res.users', string='User')
-    partner_id = fields.Many2one('res.partner', string='Partner')
+    user_id = fields.Many2one('res.users', 'User ID')
+    partner_id = fields.Many2one('res.partner', 'Partner ID')
     date = fields.Date(string='Day')
+
+    def get_visited_partner_current_user_today(self):
+
+        return self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id)])

@@ -70,3 +70,13 @@ class PartnerVisit(models.Model):
         if dif == 0:
             self.next_date = date.today() + timedelta(days=7)
 
+    def get_partner_list_to_visit_today(self):
+
+        visited_user_data = self.env["route.visited"].get_visited_partner_current_user_today()
+
+        partner_id_list = []
+        for n in visited_user_data:
+            partner_id_list.append(n.partner_id.id)
+
+        return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
+                            ('partner_id.id', 'not in', partner_id_list)], order='order', limit=1)
