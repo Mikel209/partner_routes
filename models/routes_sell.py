@@ -1,10 +1,18 @@
-from odoo import models, fields, _
+from odoo import api, fields, models
 from datetime import date
 import logging
 
 
-class RouteSell(models.Model):
+class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    @api.model
+    def get_default(self, fields):
+        logging.info('-----------------------Hola------------------------')
+        result = super(SaleOrder, self).get_default(fields)
+        result['partner_id'] = self.env["partner.visit"].get_partner_list_to_visit_today()
+        return result
+
 
     def run_button(self):
         next_partner_to_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
