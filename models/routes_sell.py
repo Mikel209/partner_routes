@@ -22,12 +22,32 @@ class SaleOrder(models.Model):
                                  default=_get_default_partner)
 
     def run_button(self):
-        if self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id):
-            next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
-            if next_partner_visit:
-                self.partner_id = next_partner_visit.partner_id.id
+        logging.info("self.partner_id.id")
+        logging.info(self.partner_id.id)
+
+        self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
+        last_partner_visit = self.env["partner.visit"].get_last_partner_list().partner_id.id
+        next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today().partner_id.id
+
+        logging.info("next_partner_visit")
+        logging.info(next_partner_visit)
+
+        logging.info("last_partner_visit")
+        logging.info(last_partner_visit)
+
+        if last_partner_visit != self.partner_id.id:
+            self.partner_id = next_partner_visit
         else:
-            raise UserError(_("No more visits"))
+            self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
+            self.partner_id = self.partner_id.id
+
+        # next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
+        # if next_partner_visit.partner_id.id == self.env["partner.visit"].get_last_partner_list().partner_id.id:
+        #     self.partner_id = next_partner_visit.partner_id.id
+        #     self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
+        #     raise UserError(_("No more visits"))
+        # elif next_partner_visit:
+        #     self.partner_id = next_partner_visit.partner_id.id
 
 
 class RouteVisited(models.Model):
@@ -46,8 +66,11 @@ class RouteVisited(models.Model):
             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)])
 
     def is_record_creation_of_the_costumer_visited(self, partner_id):
-        if self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
-            return False
+    #     if self.search(
+    #             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
+        # logging.info("existeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        # logging.info(partner_id)
 
         self.create({'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()})
-        return True
+        # logging.info("no existeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        # logging.info(partner_id)
