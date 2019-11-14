@@ -69,16 +69,41 @@
         </field>
     </record>
 
-<!--    <record id="view_send_sale_order_form" model="ir.ui.view">-->
-<!--        <field name="name">sale.order.form</field>-->
-<!--        <field name="model">sale.order</field>-->
-<!--        <field name="inherit_id" ref="sale.view_order_form"/>-->
+    <record id="view_sale_order_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="after">
+                <div class="alert alert-info" role="alert" style="margin-bottom:0px;" attrs="{'invisible': [('has_outstanding','=',False)]}">
+                    <b>You haven't more visits today.</b>
+                </div>
+                <field name="has_outstanding" invisible="1"/>
+	        </xpath>
+        </field>
+    </record>
+
+<!--    <record id="warning_form" model="ir.ui.view">-->
+<!--        <field name="name">warning.form</field>-->
+<!--        <field name="model">warning</field>-->
+<!--        <field eval="20" name="priority"/>-->
 <!--        <field name="arch" type="xml">-->
-<!--            <xpath expr="//field[@name='partner_id']" position="after">-->
-<!--                <button style="margin: 0px; padding: 0px; font-size: 9px; width: 100%; background-color: #4CAF50; text-align: center;"-->
-<!--                        string="Send" class="btn btn-link" type="object" name="run_button"/>-->
-<!--            </xpath>-->
+<!--            <form string="Warning" version="7.0">-->
+<!--                <field name="message"  nolabel="1" />-->
+<!--                <footer>-->
+<!--                    <button string="OK" class="oe_highlight" special="cancel" />-->
+<!--                </footer>-->
+<!--            </form>-->
 <!--        </field>-->
+<!--    </record>-->
+
+<!--    <record model="ir.actions.act_window" id="action_warning">-->
+<!--        <field name="name">Warning</field>-->
+<!--        <field name="res_model">warning</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">form</field>-->
+<!--        <field name="view_id" ref="warning_form" />-->
+<!--        <field name="target">new</field>-->
 <!--    </record>-->
 
 </odoo>

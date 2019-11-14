@@ -1,13 +1,16 @@
 from xxlimited import Null
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
 from datetime import date
 import logging
 
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    next_partner_visit = 0
+
+    has_outstanding = fields.Boolean(compute='_compute_data')
 
     @api.model
     def _get_default_partner(self):
@@ -22,32 +25,21 @@ class SaleOrder(models.Model):
                                  default=_get_default_partner)
 
     def run_button(self):
-        logging.info("self.partner_id.id")
-        logging.info(self.partner_id.id)
-
         self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
-        last_partner_visit = self.env["partner.visit"].get_last_partner_list().partner_id.id
-        next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today().partner_id.id
 
-        logging.info("next_partner_visit")
-        logging.info(next_partner_visit)
+        self.next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
 
-        logging.info("last_partner_visit")
-        logging.info(last_partner_visit)
+        if self.next_partner_visit:
+            self.partner_id = self.next_partner_visit.partner_id.id
 
-        if last_partner_visit != self.partner_id.id:
-            self.partner_id = next_partner_visit
+    def _compute_data(self):
+        logging.info(self.next_partner_visit)
+        if self.next_partner_visit:
+            logging.info("---------------------")
+            self.has_outstanding = False
         else:
-            self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
-            self.partner_id = self.partner_id.id
-
-        # next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
-        # if next_partner_visit.partner_id.id == self.env["partner.visit"].get_last_partner_list().partner_id.id:
-        #     self.partner_id = next_partner_visit.partner_id.id
-        #     self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
-        #     raise UserError(_("No more visits"))
-        # elif next_partner_visit:
-        #     self.partner_id = next_partner_visit.partner_id.id
+            logging.info("++++++++++++++++++++++")
+            self.has_outstanding = True
 
 
 class RouteVisited(models.Model):
@@ -66,11 +58,13 @@ class RouteVisited(models.Model):
             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)])
 
     def is_record_creation_of_the_costumer_visited(self, partner_id):
-    #     if self.search(
-    #             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
-        # logging.info("existeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-        # logging.info(partner_id)
+        if not self.search(
+                [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
+            self.create({'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()})
 
-        self.create({'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()})
-        # logging.info("no existeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-        # logging.info(partner_id)
+        logging.info("creación d registro")
+        logging.info(partner_id)
+
+        # self.env["partner.visit"].create(
+        #     {'week_day', '=', self.week_day, 'order', '=', self.order, 'period', '=', self.period, 'order', '=',
+        #      self.order, 'next_date', '=', self.next_date, })

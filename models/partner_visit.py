@@ -1,5 +1,7 @@
 from odoo import models, fields, api, _
 from datetime import date, datetime, time, timedelta
+from odoo.exceptions import UserError
+
 import logging
 
 
@@ -71,7 +73,6 @@ class PartnerVisit(models.Model):
             self.next_date = date.today() + timedelta(days=7)
 
     def get_partner_list_to_visit_today(self):
-
         visited_user_data = self.env["route.visited"].get_visited_partner_current_user_today()
 
         partner_id_list = []
@@ -80,9 +81,7 @@ class PartnerVisit(models.Model):
 
         return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
                             ('partner_id.id', 'not in', partner_id_list)], order='order', limit=1)
-
-    def get_last_partner_list(self):
-
+    def get_partner_list_desc_day(self):
         visited_user_data = self.env["route.visited"].get_visited_partner_current_user_today()
 
         partner_id_list = []
@@ -90,4 +89,13 @@ class PartnerVisit(models.Model):
             partner_id_list.append(n.partner_id.id)
 
         return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
-                            ('partner_id.id', 'not in', partner_id_list)], order='order desc', limit=1)
+                            ('partner_id.id', 'not in', partner_id_list)], order='order asc', limit=1)
+
+    # def get_partner_to_visit_today_or_rise(self):
+    #     partner_id = self.get_partner_list_to_visit_today()
+    #     # if not partner_id:
+    #         # self.env['bus.bus'].sendone(
+    #         #     (self._cr.dbname, 'res.partner', self.env.user.partner_id.id),
+    #         #     {'type': 'simple_notification', 'title': _('No more visit'), 'sticky': True, 'warning': True})
+    #
+    #     return partner_id
