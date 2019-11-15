@@ -1,6 +1,6 @@
 from odoo import models, fields, api, _
 from datetime import date, datetime, time, timedelta
-from odoo.exceptions import UserError
+from dateutil.relativedelta import relativedelta
 
 import logging
 
@@ -59,18 +59,29 @@ class PartnerVisit(models.Model):
             return {}
         return {'warning': {'title': _('Error!'), 'message': _('The order number must be greater than 0.')}}
 
-    @api.onchange('week_day')
+    @api.onchange('week_day', 'period')
     def on_change_week_day(self):
-        dif = int(self.week_day) - int(date.today().strftime('%w'))
 
+        if self.period == 'week':
+            next_date = date.today() + timedelta(days=7)
+            self.get_day_depend_period_and_weekday(next_date)
+
+        if self.period == 'fortnight':
+            next_date = date.today() + timedelta(days=14)
+            self.get_day_depend_period_and_weekday(next_date)
+
+        if self.period == 'month':
+            next_date = date.today() + relativedelta(months=+1)
+            self.get_day_depend_period_and_weekday(next_date)
+
+    def get_day_depend_period_and_weekday(self, next_date):
+        dif = int(self.week_day) - int(next_date.strftime('%w'))
         if dif > 0:
-            self.next_date = date.today() + timedelta(days=dif)
-
+            self.next_date = next_date + timedelta(days=dif)
         if dif < 0:
-            self.next_date = date.today() + timedelta(days=dif + 7)
-
+            self.next_date = next_date + timedelta(days=dif + 7)
         if dif == 0:
-            self.next_date = date.today() + timedelta(days=7)
+            self.next_date = next_date + timedelta(days=7)
 
     def get_partner_list_to_visit_today(self):
         visited_user_data = self.env["route.visited"].get_visited_partner_current_user_today()
@@ -81,21 +92,18 @@ class PartnerVisit(models.Model):
 
         return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
                             ('partner_id.id', 'not in', partner_id_list)], order='order', limit=1)
-    def get_partner_list_desc_day(self):
-        visited_user_data = self.env["route.visited"].get_visited_partner_current_user_today()
 
-        partner_id_list = []
-        for n in visited_user_data:
-            partner_id_list.append(n.partner_id.id)
-
-        return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
-                            ('partner_id.id', 'not in', partner_id_list)], order='order asc', limit=1)
-
-    # def get_partner_to_visit_today_or_rise(self):
-    #     partner_id = self.get_partner_list_to_visit_today()
-    #     # if not partner_id:
-    #         # self.env['bus.bus'].sendone(
-    #         #     (self._cr.dbname, 'res.partner', self.env.user.partner_id.id),
-    #         #     {'type': 'simple_notification', 'title': _('No more visit'), 'sticky': True, 'warning': True})
-    #
-    #     return partner_id
+    def calculate_next_visit_depend_period(self, partner_id):
+        logging.info("************************")
+        logging.info(self.search([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
+                                  ('partner_id.user_id.id', '=', self.env.user.id)]))
+        for visit in self.search([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
+                                  ('partner_id.user_id.id', '=', self.env.user.id)]):
+            logging.info(visit.week_day)
+            self.create([{'partner_id': partner_id,
+                          'week_day': visit.week_day,
+                          'order': visit.order,
+                          'period': visit.period,
+                          'next_date': self.on_change_week_day()}])
+# el next date es lo que no estoy 100% seguro de que funcione,
+# por que no se si al pasarle una metodo y sin parametros va a saber q dias coger

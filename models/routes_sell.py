@@ -8,8 +8,6 @@ import logging
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    next_partner_visit = 0
-
     has_outstanding = fields.Boolean(compute='_compute_data')
 
     @api.model
@@ -25,22 +23,22 @@ class SaleOrder(models.Model):
                                  default=_get_default_partner)
 
     def run_button(self):
-        self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
+        if self.partner_id.id != self.env.user.id:
+            self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
 
-        self.next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
+            next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
 
-        if self.next_partner_visit:
-            self.partner_id = self.next_partner_visit.partner_id.id
+            if next_partner_visit:
+                self.partner_id = next_partner_visit.partner_id.id
+            else:
+                self.partner_id = self.env.user.id
+                # context = {"end_visit": True}
 
+    @api.depends('partner_id')
     def _compute_data(self):
-        logging.info(self.next_partner_visit)
-        if self.next_partner_visit:
-            logging.info("---------------------")
-            self.has_outstanding = False
-        else:
+        if self.partner_id.id == self.env.user.id:
             logging.info("++++++++++++++++++++++")
             self.has_outstanding = True
-
 
 class RouteVisited(models.Model):
     _name = "route.visited"
@@ -62,9 +60,4 @@ class RouteVisited(models.Model):
                 [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
             self.create({'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()})
 
-        logging.info("creación d registro")
-        logging.info(partner_id)
-
-        # self.env["partner.visit"].create(
-        #     {'week_day', '=', self.week_day, 'order', '=', self.order, 'period', '=', self.period, 'order', '=',
-        #      self.order, 'next_date', '=', self.next_date, })
+            self.env["partner.visit"].calculate_next_visit_depend_period(partner_id)
