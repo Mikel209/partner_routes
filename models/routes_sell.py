@@ -1,5 +1,3 @@
-from xxlimited import Null
-
 from odoo import api, fields, models, _
 from datetime import date
 import logging
@@ -22,6 +20,7 @@ class SaleOrder(models.Model):
                                  help="You can find a customer by its Name, TIN, Email or Internal Reference.",
                                  default=_get_default_partner)
 
+    @api.one
     def run_button(self):
         if self.partner_id.id != self.env.user.id:
             self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
@@ -32,12 +31,17 @@ class SaleOrder(models.Model):
                 self.partner_id = next_partner_visit.partner_id.id
             else:
                 self.partner_id = self.env.user.id
-                # context = {"end_visit": True}
+
+    @api.model
+    def create(self, vals):
+        res = super(SaleOrder, self).create(vals)
+        res.run_button()
+        return res
 
     @api.depends('partner_id')
     def _compute_data(self):
         if self.partner_id.id == self.env.user.id:
-            logging.info("++++++++++++++++++++++")
+            logging.info("+++++++++++FINISH+++++++++++")
             self.has_outstanding = True
 
 

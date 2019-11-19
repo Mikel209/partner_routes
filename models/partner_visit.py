@@ -1,7 +1,6 @@
 from odoo import models, fields, api, _
 from datetime import date, datetime, time, timedelta
 from dateutil.relativedelta import relativedelta
-
 import logging
 
 
@@ -114,28 +113,6 @@ class PartnerVisit(models.Model):
                 return next_date + timedelta(days=dif + 7)
             if dif == 0:
                 return next_date
-
-    # def _get_new_next_date_adjust(self, week_day, next_date):
-    #     dif = int(week_day) - int(next_date.strftime('%w'))
-    #
-    #     if dif > 0:
-    #         next_date = next_date + timedelta(days=dif)
-    #     if dif < 0:
-    #         next_date = next_date + timedelta(days=dif + 7)
-    #     if dif == 0:
-    #         next_date = next_date
-    #     return next_date
-    #
-    # def calculate_new_next_day(self, next_date, period, week_day):
-    #
-    #     if period == 'week':
-    #         return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=7))
-    #
-    #     if period == 'fortnight':
-    #         return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=14))
-    #
-    #     if period == 'month':
-    #         return self._get_new_next_date_adjust(week_day, next_date + relativedelta(months=+1))
 
     def calculate_next_visit_depend_period(self, partner_id):
         for visit in self.search_read([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
