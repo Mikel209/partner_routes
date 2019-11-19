@@ -40,6 +40,7 @@ class SaleOrder(models.Model):
             logging.info("++++++++++++++++++++++")
             self.has_outstanding = True
 
+
 class RouteVisited(models.Model):
     _name = "route.visited"
     _description = "The Route Visited"
@@ -61,3 +62,4 @@ class RouteVisited(models.Model):
             self.create({'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()})
 
             self.env["partner.visit"].calculate_next_visit_depend_period(partner_id)
+

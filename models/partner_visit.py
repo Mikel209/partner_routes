@@ -59,29 +59,32 @@ class PartnerVisit(models.Model):
             return {}
         return {'warning': {'title': _('Error!'), 'message': _('The order number must be greater than 0.')}}
 
-    @api.onchange('week_day', 'period')
-    def on_change_week_day(self):
-
-        if self.period == 'week':
-            next_date = date.today() + timedelta(days=7)
-            self.get_day_depend_period_and_weekday(next_date)
-
-        if self.period == 'fortnight':
-            next_date = date.today() + timedelta(days=14)
-            self.get_day_depend_period_and_weekday(next_date)
-
-        if self.period == 'month':
-            next_date = date.today() + relativedelta(months=+1)
-            self.get_day_depend_period_and_weekday(next_date)
-
-    def get_day_depend_period_and_weekday(self, next_date):
-        dif = int(self.week_day) - int(next_date.strftime('%w'))
+    def _get_next_date_adjust(self, sum_date):
+        dif = int(self.week_day) - int(sum_date.strftime('%w'))
         if dif > 0:
-            self.next_date = next_date + timedelta(days=dif)
-        if dif < 0:
-            self.next_date = next_date + timedelta(days=dif + 7)
-        if dif == 0:
-            self.next_date = next_date + timedelta(days=7)
+            self.next_date = sum_date + timedelta(days=dif)
+        elif dif < 0:
+            self.next_date = sum_date + timedelta(days=dif + 7)
+        elif dif == 0:
+            self.next_date = sum_date
+
+    @api.onchange('week_day', 'period')
+    def on_change_week_day_or_period(self):
+        if self.period == 'week':
+            sum_date = date.today() + timedelta(days=7)
+            self._get_next_date_adjust(sum_date)
+
+        elif self.period == 'fortnight':
+            sum_date = date.today() + timedelta(days=14)
+            self._get_next_date_adjust(sum_date)
+
+        elif self.period == 'month':
+            sum_date = date.today() + relativedelta(months=+1)
+            self._get_next_date_adjust(sum_date)
+
+    @api.onchange('next_date')
+    def on_change_next_date(self):
+        self.week_day = self.next_date.strftime('%w')
 
     def get_partner_list_to_visit_today(self):
         visited_user_data = self.env["route.visited"].get_visited_partner_current_user_today()
@@ -93,17 +96,39 @@ class PartnerVisit(models.Model):
         return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
                             ('partner_id.id', 'not in', partner_id_list)], order='order', limit=1)
 
+    def _get_new_next_date_adjust(self, week_day, next_date):
+        dif = int(week_day) - int(next_date.strftime('%w'))
+
+        if dif > 0:
+            next_date = next_date + timedelta(days=dif)
+        if dif < 0:
+            next_date = next_date + timedelta(days=dif + 7)
+        if dif == 0:
+            next_date = next_date
+        return next_date
+
+    def calculate_day(self, next_date, period, week_day):
+
+        if period == 'week':
+            return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=7))
+
+        if period == 'fortnight':
+            return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=14))
+
+        if period == 'month':
+            return self._get_new_next_date_adjust(week_day, next_date + relativedelta(months=+1))
+
     def calculate_next_visit_depend_period(self, partner_id):
-        logging.info("************************")
-        logging.info(self.search([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
-                                  ('partner_id.user_id.id', '=', self.env.user.id)]))
-        for visit in self.search([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
-                                  ('partner_id.user_id.id', '=', self.env.user.id)]):
-            logging.info(visit.week_day)
-            self.create([{'partner_id': partner_id,
-                          'week_day': visit.week_day,
-                          'order': visit.order,
-                          'period': visit.period,
-                          'next_date': self.on_change_week_day()}])
-# el next date es lo que no estoy 100% seguro de que funcione,
-# por que no se si al pasarle una metodo y sin parametros va a saber q dias coger
+        for visit in self.search_read([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
+                                 ('partner_id.user_id.id', '=', self.env.user.id)], fields=['next_date', 'order',
+                                                                                            'week_day', 'period']):
+           next_visit = self.calculate_day(visit['next_date'], visit['period'], visit['week_day'])
+
+           if self.search_count(([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
+                                 ('partner_id.user_id.id', '=', self.env.user.id)])) != 0:
+
+                self.create([{'partner_id': partner_id,
+                              'week_day': visit['week_day'],
+                              'order': visit['order'],
+                              'period':  visit['period'],
+                              'next_date': next_visit}])
