@@ -96,22 +96,21 @@ class PartnerVisit(models.Model):
                             ('partner_id.id', 'not in', partner_id_list)], order='order', limit=1)
 
     def get_new_next_day_calculated(self, next_date, period, week_day):
-
         if period == 'week':
             return next_date + timedelta(days=7)
 
-        if period == 'fortnight':
+        elif period == 'fortnight':
             return next_date + timedelta(days=14)
 
-        if period == 'month':
+        elif period == 'month':
             next_date = next_date + relativedelta(months=+1)
             dif = int(week_day) - int(next_date.strftime('%w'))
 
             if dif > 0:
                 return next_date + timedelta(days=dif)
-            if dif < 0:
+            elif dif < 0:
                 return next_date + timedelta(days=dif + 7)
-            if dif == 0:
+            elif dif == 0:
                 return next_date
 
     def calculate_next_visit_depend_period(self, partner_id):
