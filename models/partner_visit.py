@@ -96,39 +96,58 @@ class PartnerVisit(models.Model):
         return self.search([('next_date', '=', date.today()), ('partner_id.user_id.id', '=', self.env.user.id),
                             ('partner_id.id', 'not in', partner_id_list)], order='order', limit=1)
 
-    def _get_new_next_date_adjust(self, week_day, next_date):
-        dif = int(week_day) - int(next_date.strftime('%w'))
-
-        if dif > 0:
-            next_date = next_date + timedelta(days=dif)
-        if dif < 0:
-            next_date = next_date + timedelta(days=dif + 7)
-        if dif == 0:
-            next_date = next_date
-        return next_date
-
-    def calculate_day(self, next_date, period, week_day):
+    def get_new_next_day_calculated(self, next_date, period, week_day):
 
         if period == 'week':
-            return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=7))
+            return next_date + timedelta(days=7)
 
         if period == 'fortnight':
-            return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=14))
+            return next_date + timedelta(days=14)
 
         if period == 'month':
-            return self._get_new_next_date_adjust(week_day, next_date + relativedelta(months=+1))
+            next_date = next_date + relativedelta(months=+1)
+            dif = int(week_day) - int(next_date.strftime('%w'))
+
+            if dif > 0:
+                return next_date + timedelta(days=dif)
+            if dif < 0:
+                return next_date + timedelta(days=dif + 7)
+            if dif == 0:
+                return next_date
+
+    # def _get_new_next_date_adjust(self, week_day, next_date):
+    #     dif = int(week_day) - int(next_date.strftime('%w'))
+    #
+    #     if dif > 0:
+    #         next_date = next_date + timedelta(days=dif)
+    #     if dif < 0:
+    #         next_date = next_date + timedelta(days=dif + 7)
+    #     if dif == 0:
+    #         next_date = next_date
+    #     return next_date
+    #
+    # def calculate_new_next_day(self, next_date, period, week_day):
+    #
+    #     if period == 'week':
+    #         return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=7))
+    #
+    #     if period == 'fortnight':
+    #         return self._get_new_next_date_adjust(week_day, next_date + timedelta(days=14))
+    #
+    #     if period == 'month':
+    #         return self._get_new_next_date_adjust(week_day, next_date + relativedelta(months=+1))
 
     def calculate_next_visit_depend_period(self, partner_id):
         for visit in self.search_read([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
-                                 ('partner_id.user_id.id', '=', self.env.user.id)], fields=['next_date', 'order',
-                                                                                            'week_day', 'period']):
-           next_visit = self.calculate_day(visit['next_date'], visit['period'], visit['week_day'])
+                                       ('partner_id.user_id.id', '=', self.env.user.id)], fields=['next_date', 'order',
+                                                                                                  'week_day',
+                                                                                                  'period']):
+            next_visit = self.get_new_next_day_calculated(visit['next_date'], visit['period'], visit['week_day'])
 
-           if self.search_count(([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
-                                 ('partner_id.user_id.id', '=', self.env.user.id)])) != 0:
-
+            if self.search_count(([('next_date', '=', date.today()), ('partner_id.id', '=', partner_id),
+                                   ('partner_id.user_id.id', '=', self.env.user.id)])) != 0:
                 self.create([{'partner_id': partner_id,
                               'week_day': visit['week_day'],
                               'order': visit['order'],
-                              'period':  visit['period'],
+                              'period': visit['period'],
                               'next_date': next_visit}])
