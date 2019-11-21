@@ -21,18 +21,20 @@ class SaleOrder(models.Model):
                                  help="You can find a customer by its Name, TIN, Email or Internal Reference.",
                                  default=_get_default_partner)
 
-    # @api.model
-    # def create(self, vals):
-    #     res = super(SaleOrder, self).create(vals)
-    #     res.button_next_costumer()
-    #     # logging.info("---------------dewsde create---------------------------------")
-    #     return res
+    @api.model
+    def create(self, vals):
+        res = super(SaleOrder, self).create(vals)
+        res.onchange_button_next_costumer()
+        logging.info("---------------dewsde create nuevo id---------------------------------")
+        logging.info(res.id)
+        return res
 
     @api.multi
     @api.onchange('button_next_costumer')
     def onchange_button_next_costumer(self):
         if self.partner_id.id != self.env.user.id:
             self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
+            logging.info(self.id)
 
             next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
 
@@ -49,6 +51,36 @@ class SaleOrder(models.Model):
             self.has_outstanding = True
 
 
+# class RouteVisited(models.Model):
+#     _name = "route.visited"
+#     _description = "The Route Visited"
+#
+#     user_id = fields.Many2one('res.users', 'User ID')
+#     partner_id = fields.Many2one('res.partner', 'Partner ID')
+#     date = fields.Date(string='Day')
+#     sale_order_id = fields.One2many('sale.order', 'id')
+#
+#     hour = fields.Char(compute='_compute_hour', string='Hora')
+#
+#     @api.one
+#     def _compute_hour(self):
+#         self.hour = self.create_date.strftime("%H:%M:%S")
+#
+#     def get_visited_partner_current_user_today(self):
+#         return self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id)])
+#
+#     def get_visited_partner_testing(self, partner_id):
+#         return self.search(
+#             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)])
+#
+#     def is_record_creation_of_the_costumer_visited(self, partner_id, sale_order_id):
+#         if not self.search(
+#                 [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
+#             self.create([{'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today(),
+#                           'sale_order_id': sale_order_id}])
+#
+#             self.env["partner.visit"].calculate_next_visit_depend_period(partner_id)
+
 class RouteVisited(models.Model):
     _name = "route.visited"
     _description = "The Route Visited"
@@ -56,7 +88,12 @@ class RouteVisited(models.Model):
     user_id = fields.Many2one('res.users', 'User ID')
     partner_id = fields.Many2one('res.partner', 'Partner ID')
     date = fields.Date(string='Day')
-    # id_boolean = fields.One2many('sale.order', 'id')
+
+    hour = fields.Char(compute='_compute_hour', string='Hora')
+
+    @api.one
+    def _compute_hour(self):
+        self.hour = self.create_date.strftime("%H:%M:%S")
 
     def get_visited_partner_current_user_today(self):
         return self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id)])

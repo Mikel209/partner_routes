@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<odoo>
+        <record id="partner_route_visited" model="ir.ui.view">
+        <field name="name">partner.route.visited.wizard</field>
+        <field name="model">partner.route.visited</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="user_id" options="{'no_create': True, 'no_open': True}" required="1"/>
+                    <field name="date_begin" required="1"/>
+                    <field name="final_date" required="1"/>
+                </group>
+                <footer>
+                    <button string="Generate Report" name="run_wizard_partner_route_visited" type="object" default_focus="1"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_partner_route_visited_tree">
+        <field name="name">res.route.visited.tree</field>
+        <field name="model">route.visited</field>
+        <field name="arch" type="xml">
+            <tree string="Visit Days">
+                <field name="user_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="hour"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_report_partner_route_visited" model="ir.actions.act_window">
+        <field name="name">Report Visits of the Day</field>
+        <field name="res_model">partner.route.visited</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_action_report_partner_route_visited_wizard"
+            name="Report route visited"
+            parent="base.menu_administration"
+            sequence="30"
+            action="action_report_partner_route_visited"/>
+
+</odoo>

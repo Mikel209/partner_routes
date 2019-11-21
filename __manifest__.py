@@ -15,6 +15,7 @@
     ],
     'data': [
         'wizards/wizards_select_visits_routes.xml',
+        'wizards/wizards_report_route_visited.xml',
         'security/ir.model.access.csv',
         'views/view.xml',
     ],
