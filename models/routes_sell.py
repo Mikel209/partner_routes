@@ -7,6 +7,7 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
 
     has_outstanding = fields.Boolean(compute='_compute_data')
+    button_next_costumer = fields.Boolean('Next Costumer')
 
     @api.model
     def _get_default_partner(self):
@@ -20,8 +21,16 @@ class SaleOrder(models.Model):
                                  help="You can find a customer by its Name, TIN, Email or Internal Reference.",
                                  default=_get_default_partner)
 
-    @api.one
-    def run_button(self):
+    # @api.model
+    # def create(self, vals):
+    #     res = super(SaleOrder, self).create(vals)
+    #     res.button_next_costumer()
+    #     # logging.info("---------------dewsde create---------------------------------")
+    #     return res
+
+    @api.multi
+    @api.onchange('button_next_costumer')
+    def onchange_button_next_costumer(self):
         if self.partner_id.id != self.env.user.id:
             self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
 
@@ -31,12 +40,7 @@ class SaleOrder(models.Model):
                 self.partner_id = next_partner_visit.partner_id.id
             else:
                 self.partner_id = self.env.user.id
-
-    @api.model
-    def create(self, vals):
-        res = super(SaleOrder, self).create(vals)
-        res.run_button()
-        return res
+        # logging.info("---------------------desde run button--------------------")
 
     @api.depends('partner_id')
     def _compute_data(self):
@@ -52,6 +56,7 @@ class RouteVisited(models.Model):
     user_id = fields.Many2one('res.users', 'User ID')
     partner_id = fields.Many2one('res.partner', 'Partner ID')
     date = fields.Date(string='Day')
+    # id_boolean = fields.One2many('sale.order', 'id')
 
     def get_visited_partner_current_user_today(self):
         return self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id)])
@@ -63,7 +68,6 @@ class RouteVisited(models.Model):
     def is_record_creation_of_the_costumer_visited(self, partner_id):
         if not self.search(
                 [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
-            self.create({'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()})
+            self.create([{'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()}])
 
             self.env["partner.visit"].calculate_next_visit_depend_period(partner_id)
-
