@@ -9,40 +9,30 @@ class SaleOrder(models.Model):
     has_outstanding = fields.Boolean(compute='_compute_data')
     button_next_costumer = fields.Boolean('Next Costumer')
 
-    @api.model
-    def _get_default_partner(self):
-        default_partner_to_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
+    @api.multi
+    @api.onchange('button_next_costumer')
+    def onchange_button_next_costumer(self, sale_id=0):
+        if sale_id != 0:
+            self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id, sale_id)
 
-        return default_partner_to_visit.partner_id.id
+        elif self.partner_id.id:
+            self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id, sale_id)
+            next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today().partner_id.id
 
-    partner_id = fields.Many2one('res.partner', string='Customer', readonly=True,
-                                 states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=True,
-                                 change_default=True, index=True, track_visibility='always', track_sequence=1,
-                                 help="You can find a customer by its Name, TIN, Email or Internal Reference.",
-                                 default=_get_default_partner)
+            if next_partner_visit:
+                self.partner_id = next_partner_visit
+            else:
+                self.partner_id = self.env.user.id
+
+        if not self.partner_id.id:
+            self.partner_id = self.env["partner.visit"].get_partner_list_to_visit_today().partner_id.id
+            # self.payment_term_id = 1
 
     @api.model
     def create(self, vals):
         res = super(SaleOrder, self).create(vals)
-        res.onchange_button_next_costumer()
-        logging.info("---------------dewsde create nuevo id---------------------------------")
-        logging.info(res.id)
+        res.onchange_button_next_costumer(res.id)
         return res
-
-    @api.multi
-    @api.onchange('button_next_costumer')
-    def onchange_button_next_costumer(self):
-        if self.partner_id.id != self.env.user.id:
-            self.env["route.visited"].is_record_creation_of_the_costumer_visited(self.partner_id.id)
-            logging.info(self.id)
-
-            next_partner_visit = self.env["partner.visit"].get_partner_list_to_visit_today()
-
-            if next_partner_visit:
-                self.partner_id = next_partner_visit.partner_id.id
-            else:
-                self.partner_id = self.env.user.id
-        # logging.info("---------------------desde run button--------------------")
 
     @api.depends('partner_id')
     def _compute_data(self):
@@ -51,36 +41,6 @@ class SaleOrder(models.Model):
             self.has_outstanding = True
 
 
-# class RouteVisited(models.Model):
-#     _name = "route.visited"
-#     _description = "The Route Visited"
-#
-#     user_id = fields.Many2one('res.users', 'User ID')
-#     partner_id = fields.Many2one('res.partner', 'Partner ID')
-#     date = fields.Date(string='Day')
-#     sale_order_id = fields.One2many('sale.order', 'id')
-#
-#     hour = fields.Char(compute='_compute_hour', string='Hora')
-#
-#     @api.one
-#     def _compute_hour(self):
-#         self.hour = self.create_date.strftime("%H:%M:%S")
-#
-#     def get_visited_partner_current_user_today(self):
-#         return self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id)])
-#
-#     def get_visited_partner_testing(self, partner_id):
-#         return self.search(
-#             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)])
-#
-#     def is_record_creation_of_the_costumer_visited(self, partner_id, sale_order_id):
-#         if not self.search(
-#                 [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
-#             self.create([{'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today(),
-#                           'sale_order_id': sale_order_id}])
-#
-#             self.env["partner.visit"].calculate_next_visit_depend_period(partner_id)
-
 class RouteVisited(models.Model):
     _name = "route.visited"
     _description = "The Route Visited"
@@ -88,12 +48,19 @@ class RouteVisited(models.Model):
     user_id = fields.Many2one('res.users', 'User ID')
     partner_id = fields.Many2one('res.partner', 'Partner ID')
     date = fields.Date(string='Day')
+    sale_order_id = fields.Many2one('sale.order', 'Reference')
 
-    hour = fields.Char(compute='_compute_hour', string='Hora')
+    hour = fields.Char(compute='_compute_route_visited', string='Hour')
+
+    # sale_order_id_y_or_n = fields.Char(compute='_compute_route_visited', string='Did it visit?')
 
     @api.one
-    def _compute_hour(self):
+    def _compute_route_visited(self):
         self.hour = self.create_date.strftime("%H:%M:%S")
+        if self.sale_order_id:
+            self.sale_order_id_y_or_n = 'Visitado'
+        else:
+            self.sale_order_id_y_or_n = 'No Visitado'
 
     def get_visited_partner_current_user_today(self):
         return self.search([('date', '=', date.today()), ('user_id', '=', self.env.user.id)])
@@ -102,9 +69,10 @@ class RouteVisited(models.Model):
         return self.search(
             [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)])
 
-    def is_record_creation_of_the_costumer_visited(self, partner_id):
+    def is_record_creation_of_the_costumer_visited(self, partner_id, sale_id):
         if not self.search(
                 [('date', '=', date.today()), ('user_id', '=', self.env.user.id), ('partner_id', '=', partner_id)]):
-            self.create([{'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today()}])
+            self.create([{'user_id': self.env.user.id, 'partner_id': partner_id, 'date': date.today(),
+                          'sale_order_id': sale_id}])
 
             self.env["partner.visit"].calculate_next_visit_depend_period(partner_id)
